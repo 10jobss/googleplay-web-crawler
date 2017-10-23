@@ -14,7 +14,7 @@ def get_info(start_url):
     driver = webdriver.Chrome('C:/Users/kyunghoon/Downloads/chromedriver_win32/chromedriver')
     driver.implicitly_wait(15)
     driver.get(start_url)
-    '''
+    
     elm = driver.find_element_by_tag_name('html')
 
     for i in range(1, 6): # scroll down (1 ~ 300)
@@ -26,7 +26,7 @@ def get_info(start_url):
         elm.send_keys(Keys.END)
         time.sleep(10)
         driver.implicitly_wait(30)
-    '''
+    
     driver.implicitly_wait(10)
 
     html = driver.page_source
@@ -87,9 +87,8 @@ data_sets = []
 get_info(start_url)
 
 data_keys = data_sets[0].keys()
-'''
+
 with open('google_game.csv', 'w') as csvfile:
     writer = csv.DictWriter(csvfile, delimiter=',',lineterminator='\n', fieldnames = data_keys)
     writer.writeheader()
     writer.writerows(data_sets)
-'''
