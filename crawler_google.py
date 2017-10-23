@@ -4,7 +4,7 @@ Created on Fri Oct 20 11:50:53 2017
 
 @author: kyunghoon
 """
-import requests, time, csv
+import time, csv
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -14,25 +14,32 @@ def get_info(start_url):
     driver = webdriver.Chrome('C:/Users/kyunghoon/Downloads/chromedriver_win32/chromedriver')
     driver.implicitly_wait(15)
     driver.get(start_url)
+    elm = driver.find_element_by_tag_name('html')
+   # i = 1
+    for i in range(1, 6): # scroll down (1 ~ 300)
+        elm.send_keys(Keys.END)
+        time.sleep(10)
+        driver.implicitly_wait(30)
+    driver.find_element_by_xpath('//*[@id="show-more-button"]').click()
+    for i in range(1, 5): # scroll down (300 ~ 540)
+        elm.send_keys(Keys.END)
+        time.sleep(10)
+        driver.implicitly_wait(30)
     
+    driver.implicitly_wait(10)
+
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
-    elm = driver.find_element_by_tag_name('html')
-    i = 1
-    for i in range(1, 6):
-        elm.send_keys(Keys.END)
-        time.sleep(5)
-    time.sleep(10)
-    main_content = soup.find('div', class_='body-content') # problem 뒤로 back하면 다시 reload 됨
+    driver.implicitly_wait(15) #
+    main_content = soup.find('div', class_='body-content')
     apps = main_content.find_all('div', class_='card-content id-track-click id-track-impression')
-    cnt = 1    
+    rank = 1    
     for app in apps:
+        driver.implicitly_wait(10)
         code = app.find('a', class_='card-click-target').get('href')
         target_url = base_url + code
         driver.get(target_url)
-        driver.implicitly_wait(15)
-        
-        print(code)
+        driver.implicitly_wait(5)
         
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")  
@@ -61,25 +68,23 @@ def get_info(start_url):
             elif tmp.find('div', class_='title').get_text() == "지원되는 Android 버전":
                 support_version = tmp.find('div', itemprop="operatingSystems").get_text()
         print(downloads + " *** " + support_version)
-        print(str(cnt) + " Success!")
-        cnt += 1
+        print(str(rank) + " Success!")
+        
+        tmp_dict = {'rank' : rank, 'name' : name, 'dev' : dev, 'genre' : genre, 'rating_score' : rating_score,
+                    'rating_count' : rating_count, 'age_limit' : age_limit, 'attribute' : attribute,
+                    'downloads' : downloads, 'support_version' : support_version}
+        data_sets.append(tmp_dict)
+        time.sleep(5) #
+        rank += 1
         driver.execute_script("window.history.go(-1)")
-    #f.close()
     
-#url = 'https://play.google.com/store/apps/details?id=com.efunkr.ql.google'
 start_url = 'https://play.google.com/store/apps/category/GAME/collection/topselling_free'
 base_url = 'https://play.google.com'
-#f = open('app_info22.txt', 'w')
+data_sets = []
 get_info(start_url)
 
-'''
-f.write(name + '\t')
-f.write(dev+ '\t')
-f.write(genre + '\t')
-f.write(rating_score + '\t')
-f.write(rating_count + '\t')
-f.write(age_limit + '\t')
-f.write(attribute + '\t')
-f.write(downloads)
-f.write(support_version)
-'''
+data_keys = data_sets[0].keys()
+with open('test_item_matrix_2.csv', 'w') as csvfile:
+    writer = csv.DictWriter(csvfile, delimiter=',',lineterminator='\n', fieldnames = data_keys)
+    writer.writeheader()
+    writer.writerows(data_sets)
