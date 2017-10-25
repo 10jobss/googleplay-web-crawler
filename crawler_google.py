@@ -49,11 +49,15 @@ def get_info(start_url):
         name = main_content.find('h1', class_='document-title').find('div', class_='id-app-title').get_text().strip()
         dev = main_content.find('div', class_='left-info').find('span', itemprop="name").get_text().strip()
         genre = main_content.find('div', class_='left-info').find('span', itemprop="genre").get_text().strip()
+        
+        price = driver.find_element_by_css_selector('#body-content > div.outer-container > div > div.main-content > div:nth-child(1) > div > div.details-info > div > div.info-box-bottom > div > div.details-actions-right > span > span > button > span:nth-child(3)').text
+        price = price.split(' ')[1]
+        
         rating_score = main_content.find('div', class_='score').get_text().strip()
         rating_count = main_content.find('div', class_='right-info').find('span', class_='rating-count').get_text().strip()
         
         print(name + "***" + dev + "***" + genre + "***" + rating_score + "***" + rating_count)
-        
+        print(price)
         content_dis = main_content.find('div', class_='meta-info contains-text-link')
         containers = content_dis.find_all('div', {'class' : 'content'})
         age_limit = containers[0].get_text().strip()
@@ -76,11 +80,11 @@ def get_info(start_url):
                 support_version = support_version.strip().split(' ')[0]
 
         print(downloads + "***" + support_version)
-        print(str(rank) + " Success!")
+        print(str(rank) + " Success!\n")
         
-        tmp_dict = {'rank' : rank, 'name' : name, 'dev' : dev, 'genre' : genre, 'rating_score' : rating_score,
-                    'rating_count' : rating_count, 'age_limit' : age_limit, 'attribute' : attribute,
-                    'downloads' : downloads, 'support_version' : support_version}
+        tmp_dict = {'rank' : rank, 'name' : name, 'dev' : dev, 'genre' : genre, 'paid' : 1, 'price' : price,
+                    'rating_score' : rating_score, 'rating_count' : rating_count, 'age_limit' : age_limit,
+                    'attribute' : attribute, 'downloads' : downloads, 'support_version' : support_version}
         data_sets.append(tmp_dict)
 
         time.sleep(5)
@@ -88,14 +92,15 @@ def get_info(start_url):
      #  driver.execute_script("window.history.go(-1)")
     
         
-start_url = 'https://play.google.com/store/apps/category/GAME/collection/topselling_free'
+#start_url = 'https://play.google.com/store/apps/category/GAME/collection/topselling_free'
+start_url = 'https://play.google.com/store/apps/category/GAME/collection/topselling_paid'
 base_url = 'https://play.google.com'
 data_sets = []
 get_info(start_url)
 
 data_keys = data_sets[0].keys()
 
-with open('google_game.csv', 'w', errors = 'ignore') as csvfile:
+with open('google_game_free.csv', 'w', errors = 'ignore') as csvfile:
     writer = csv.DictWriter(csvfile, delimiter=',',lineterminator='\n', fieldnames = data_keys)
     writer.writeheader()
     writer.writerows(data_sets)
