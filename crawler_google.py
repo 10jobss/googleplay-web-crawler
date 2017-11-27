@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 20 11:50:53 2017
-
 @author: kyunghoon
 """
 import time, csv
@@ -57,8 +56,6 @@ def get_info(start_url):
         dev = main_content.find('div', class_='left-info').find('span', itemprop="name").get_text().strip()
         genre = main_content.find('div', class_='left-info').find('span', itemprop="genre").get_text().strip()
         
-        #need annotation when crawling free games
-        #price = 0
         try:
             price = driver.find_element_by_css_selector('#body-content > div.outer-container > div > div.main-content > div:nth-child(1) > div > div.details-info > div > div.info-box-bottom > div > div.details-actions-right > span > span > button > span:nth-child(3)').text
             price = price.split(' ')[1]
@@ -121,7 +118,7 @@ get_info(start_url)
 data_keys = data_sets[0].keys()
 
 #path - C:\Users\kyunghoon\.spyder-py3
-with open('test_6.csv', 'w', errors = 'ignore') as csvfile:
+with open('goole_game_free.csv', 'w', errors = 'ignore') as csvfile:
     writer = csv.DictWriter(csvfile, delimiter=',',lineterminator='\n', fieldnames = data_keys)
     writer.writeheader()
     writer.writerows(data_sets)
