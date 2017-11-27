@@ -16,17 +16,19 @@ def get_info(start_url):
     driver.get(start_url)
     
     elm = driver.find_element_by_tag_name('html')
-
-    for i in range(1, 6): # scroll down (1 ~ 300)
-        elm.send_keys(Keys.END)
-        time.sleep(10)
-        driver.implicitly_wait(30)
-    driver.find_element_by_xpath('//*[@id="show-more-button"]').click()
-    for i in range(1, 5): # scroll down (300 ~ 540)
-        elm.send_keys(Keys.END)
-        time.sleep(10)
-        driver.implicitly_wait(30)
-    
+    #need annotation when testing
+    try:
+        for i in range(1, 6): # scroll down (1 ~ 300)
+            elm.send_keys(Keys.END)
+            time.sleep(10)
+            driver.implicitly_wait(30)
+        driver.find_element_by_xpath('//*[@id="show-more-button"]').click()
+        for i in range(1, 5): # scroll down (300 ~ 540)
+            elm.send_keys(Keys.END)
+            time.sleep(10)
+            driver.implicitly_wait(30)
+    except:
+        pass
     driver.implicitly_wait(10)
 
     html = driver.page_source
@@ -36,6 +38,11 @@ def get_info(start_url):
     apps = main_content.find_all('div', class_='card-content id-track-click id-track-impression')
     rank = 1    
     for app in apps:
+        #testing
+        """
+        if rank==11:
+            break;
+        """
         driver.implicitly_wait(10)
         code = app.find('a', class_='card-click-target').get('href')
         target_url = base_url + code
@@ -50,8 +57,16 @@ def get_info(start_url):
         dev = main_content.find('div', class_='left-info').find('span', itemprop="name").get_text().strip()
         genre = main_content.find('div', class_='left-info').find('span', itemprop="genre").get_text().strip()
         
-        price = driver.find_element_by_css_selector('#body-content > div.outer-container > div > div.main-content > div:nth-child(1) > div > div.details-info > div > div.info-box-bottom > div > div.details-actions-right > span > span > button > span:nth-child(3)').text
-        price = price.split(' ')[1]
+        #need annotation when crawling free games
+        #price = 0
+        try:
+            price = driver.find_element_by_css_selector('#body-content > div.outer-container > div > div.main-content > div:nth-child(1) > div > div.details-info > div > div.info-box-bottom > div > div.details-actions-right > span > span > button > span:nth-child(3)').text
+            price = price.split(' ')[1]
+            paid = 1;
+        except:
+            price = 0
+            paid = 0
+            pass
         
         rating_score = main_content.find('div', class_='score').get_text().strip()
         rating_count = main_content.find('div', class_='right-info').find('span', class_='rating-count').get_text().strip()
@@ -82,7 +97,7 @@ def get_info(start_url):
         print(downloads + "***" + support_version)
         print(str(rank) + " Success!\n")
         
-        tmp_dict = {'rank' : rank, 'name' : name, 'dev' : dev, 'genre' : genre, 'paid' : 1, 'price' : price,
+        tmp_dict = {'rank' : rank, 'name' : name, 'dev' : dev, 'genre' : genre, 'paid' : paid, 'price' : price,
                     'rating_score' : rating_score, 'rating_count' : rating_count, 'age_limit' : age_limit,
                     'attribute' : attribute, 'downloads' : downloads, 'support_version' : support_version}
         data_sets.append(tmp_dict)
@@ -90,17 +105,23 @@ def get_info(start_url):
         time.sleep(5)
         rank += 1
      #  driver.execute_script("window.history.go(-1)")
-    
-        
+"""
+free game, paid game, health, news/magazines, comic, kids
+"""
 #start_url = 'https://play.google.com/store/apps/category/GAME/collection/topselling_free'
-start_url = 'https://play.google.com/store/apps/category/GAME/collection/topselling_paid'
+#start_url = 'https://play.google.com/store/apps/category/GAME/collection/topselling_paid'
+#start_url = 'https://play.google.com/store/apps/collection/recommended_for_you_HEALTH_AND_FITNESS?clp=ygIWChJIRUFMVEhfQU5EX0ZJVE5FU1MQAQ%3D%3D:S:ANO1ljKVgyA'
+#start_url = 'https://play.google.com/store/apps/category/NEWS_AND_MAGAZINES/collection/topselling_free'
+#start_url = 'https://play.google.com/store/apps/category/COMICS/collection/topselling_free'
+start_url = 'https://play.google.com/store/apps/collection/promotion_familysafe_30018b3_new_updated?clp=SjgKLgoocHJvbW90aW9uX2ZhbWlseXNhZmVfMzAwMThiM19uZXdfdXBkYXRlZBAHGAMSBkZBTUlMWQ%3D%3D:S:ANO1ljLz2mk'
 base_url = 'https://play.google.com'
 data_sets = []
 get_info(start_url)
 
 data_keys = data_sets[0].keys()
 
-with open('google_game_free.csv', 'w', errors = 'ignore') as csvfile:
+#path - C:\Users\kyunghoon\.spyder-py3
+with open('test_6.csv', 'w', errors = 'ignore') as csvfile:
     writer = csv.DictWriter(csvfile, delimiter=',',lineterminator='\n', fieldnames = data_keys)
     writer.writeheader()
     writer.writerows(data_sets)
